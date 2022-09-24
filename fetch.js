@@ -39,7 +39,7 @@ function appendItem(item) {
   const stars = document.createElement("p");
   stars.textContent = `Stars: ${item.stargazers_count}`;
   const redCross = document.createElement("p");
-  redCross.textContent = '×';
+  redCross.textContent = "×";
   redCross.classList.add("del");
 
   wrapperDiv.append(nickName, owner, stars);
@@ -53,55 +53,55 @@ const repositories = async function () {
   zeroRepo.style.display = "none";
   if (!data) {
     removeItem(search.querySelector(".first-five-repo"));
-  }
-  let fivePcs = [];
-  const firstFiveItemsList = document.createElement("ul");
-  firstFiveItemsList.classList.add("first-five-repo");
-  let response = await fetch(
-    `https://api.github.com/search/repositories?q=${data}`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-      },
-    }
-  );
-  let res = await response.json();
-  //sort response items
-  if (res.total_count === 0) {
-    console.log("null");
-    removeItem(search.querySelector(".first-five-repo"));
-    zeroRepo.textContent = `repositories was not found`;
-    zeroRepo.style.display = "block";
-  } else if (!res.total_count) {
-    zeroRepo.textContent = `start input please`;
-    zeroRepo.style.display = "block";
   } else {
-    console.log("mnogo", res.total_count);
-    if (data.length !== 0) {
-      fivePcs = res.items.filter((el) =>
-        el.name.toLocaleLowerCase().startsWith(data.toLocaleLowerCase())
-      );
-      fivePcs = fivePcs.slice(0, 5);
-      if (search.querySelector(".first-five-repo") !== null) {
-        removeItem(search.querySelector(".first-five-repo"));
+    let fivePcs = [];
+    const firstFiveItemsList = document.createElement("ul");
+    firstFiveItemsList.classList.add("first-five-repo");
+    let response = await fetch(
+      `https://api.github.com/search/repositories?q=${data}`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+        },
       }
-      search.appendChild(firstFiveItemsList);
+    );
+    let res = await response.json();
+    //sort response items
+    if (res.total_count === 0) {
+      console.log("null");
+      removeItem(search.querySelector(".first-five-repo"));
+      zeroRepo.textContent = `repositories was not found`;
+      zeroRepo.style.display = "block";
+    } else if (!res.total_count) {
+      zeroRepo.textContent = `start input please`;
+      zeroRepo.style.display = "block";
+    } else {
+      if (data.length !== 0) {
+        fivePcs = res.items.filter((el) =>
+          el.name.toLocaleLowerCase().startsWith(data.toLocaleLowerCase())
+        );
+        fivePcs = fivePcs.slice(0, 5);
+        if (search.querySelector(".first-five-repo") !== null) {
+          removeItem(search.querySelector(".first-five-repo"));
+        }
+        search.appendChild(firstFiveItemsList);
 
-      //show autocomplete
-      fivePcs.forEach((el) => {
-        const item = document.createElement("li");
-        item.textContent = `${el.name}`;
-        item.classList.add("suggestion");
-        firstFiveItemsList.appendChild(item);
+        //show autocomplete
+        fivePcs.forEach((el) => {
+          const item = document.createElement("li");
+          item.textContent = `${el.name}`;
+          item.classList.add("suggestion");
+          firstFiveItemsList.appendChild(item);
+        });
+      }
+      //ev listener add item in choosen list
+      firstFiveItemsList.addEventListener("click", (e) => {
+        let el = fivePcs.filter((elem) => elem.name === e.target.innerText);
+        appendItem(...el);
+        removeItem(e.target.closest("ul"));
+        input.value = "";
       });
     }
-    //ev listener add item in choosen list
-    firstFiveItemsList.addEventListener("click", (e) => {
-      let el = fivePcs.filter((elem) => elem.name === e.target.innerText);
-      appendItem(...el);
-      removeItem(e.target.closest("ul"));
-      input.value = "";
-    });
   }
 };
 
