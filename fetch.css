@@ -60,8 +60,8 @@ ul{
    align-items: center;
 }
 .del{
-   content: url('https://cdn-icons-png.flaticon.com/512/67/67345.png');;
-   width: 42px;
-   height: 42px;
+   font-size: 82px;
+   color: red;
    justify-self: center;
+   cursor: pointer;
 }

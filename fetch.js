@@ -38,7 +38,8 @@ function appendItem(item) {
 
   let stars = document.createElement("p");
   stars.textContent = `Stars: ${item.stargazers_count}`;
-  let redCross = document.createElement("img");
+  let redCross = document.createElement("p");
+  redCross.textContent = '×';
   redCross.classList.add("del");
 
   wrapperDiv.append(nickName, owner, stars);
