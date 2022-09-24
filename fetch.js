@@ -4,9 +4,9 @@ const search = document.querySelector(".search");
 
 const zeroRepo = document.createElement("p");
 zeroRepo.classList.add("zero-repositories");
-search.append(zeroRepo);
 zeroRepo.textContent = `start input please`;
 zeroRepo.style.display = "block";
+search.append(zeroRepo);
 
 //debounce fn
 const debounce = (fn, debounceTime) => {
@@ -24,21 +24,21 @@ function removeItem(listElement) {
 
 //add new item in choosen list
 function appendItem(item) {
-  let itemList = document.createElement("li");
+  const itemList = document.createElement("li");
   itemList.classList.add("added-item");
 
-  let wrapperDiv = document.createElement("div");
+  const wrapperDiv = document.createElement("div");
   wrapperDiv.classList.add("wrapper-item");
 
-  let nickName = document.createElement("p");
+  const nickName = document.createElement("p");
   nickName.textContent = `Name: ${item.name}`;
 
-  let owner = document.createElement("p");
+  const owner = document.createElement("p");
   owner.textContent = `Owner: ${item.owner.login}`;
 
-  let stars = document.createElement("p");
+  const stars = document.createElement("p");
   stars.textContent = `Stars: ${item.stargazers_count}`;
-  let redCross = document.createElement("p");
+  const redCross = document.createElement("p");
   redCross.textContent = '×';
   redCross.classList.add("del");
 
@@ -89,7 +89,7 @@ const repositories = async function () {
 
       //show autocomplete
       fivePcs.forEach((el) => {
-        let item = document.createElement("li");
+        const item = document.createElement("li");
         item.textContent = `${el.name}`;
         item.classList.add("suggestion");
         firstFiveItemsList.appendChild(item);
@@ -107,7 +107,7 @@ const repositories = async function () {
 
 //ev listener delete button
 itemsList.addEventListener("click", (e) => {
-  let target = e.target;
+  const target = e.target;
   if (target.className === "del") {
     removeItem(target.closest("li"));
   }
