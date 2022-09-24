@@ -1,8 +1,14 @@
-let input = document.querySelector(".search-input");
-let itemsList = document.querySelector(".repo-list");
-let firstFiveItemsList = document.querySelector(".first-five-repo");
-let totalRepo = document.querySelector(".result-count");
+const input = document.querySelector(".search-input");
+const itemsList = document.querySelector(".repo-list");
+const search = document.querySelector(".search");
 
+const zeroRepo = document.createElement("p");
+zeroRepo.classList.add("zero-repositories");
+search.append(zeroRepo);
+zeroRepo.textContent = `start input please`;
+zeroRepo.style.display = "block";
+
+//debounce fn
 const debounce = (fn, debounceTime) => {
   let timer;
   return function () {
@@ -10,20 +16,48 @@ const debounce = (fn, debounceTime) => {
     timer = setTimeout(() => fn.apply(this, arguments), debounceTime);
   };
 };
+
+//remove choosen item
 function removeItem(listElement) {
-  listElement.remove();
+  if (listElement) listElement.remove();
 }
 
+//add new item in choosen list
 function appendItem(item) {
   let itemList = document.createElement("li");
-  itemList.innerHTML = `<p>Name: ${item.name}</p><p>NickName: ${item.owner.login}</p><p>Stars: ${item.stargazers_count}</p><button class='del'>remove</button>
-  `;
+  itemList.classList.add("added-item");
+
+  let wrapperDiv = document.createElement("div");
+  wrapperDiv.classList.add("wrapper-item");
+
+  let nickName = document.createElement("p");
+  nickName.textContent = `Name: ${item.name}`;
+
+  let owner = document.createElement("p");
+  owner.textContent = `Owner: ${item.owner.login}`;
+
+  let stars = document.createElement("p");
+  stars.textContent = `Stars: ${item.stargazers_count}`;
+  let redCross = document.createElement("img");
+  redCross.classList.add("del");
+
+  wrapperDiv.append(nickName, owner, stars);
+  itemList.append(wrapperDiv, redCross);
   itemsList.prepend(itemList);
 }
 
-let repositories = async function getRepos() {
+//get response from server
+const repositories = async function () {
+  const data = input.value;
+  zeroRepo.style.display = "none";
+  if (!data) {
+    removeItem(search.querySelector(".first-five-repo"));
+  }
+  let fivePcs = [];
+  const firstFiveItemsList = document.createElement("ul");
+  firstFiveItemsList.classList.add("first-five-repo");
   let response = await fetch(
-    `https://api.github.com/search/repositories?q=${input.value}`,
+    `https://api.github.com/search/repositories?q=${data}`,
     {
       headers: {
         Accept: "application/vnd.github+json",
@@ -31,23 +65,46 @@ let repositories = async function getRepos() {
     }
   );
   let res = await response.json();
-  totalRepo.textContent = `total repositories:${res.total_count}`;
-  let fivePcs = res.items.slice(0, 5);
-  firstFiveItemsList.innerHTML = "";
-  fivePcs.forEach((el) => {
-    let item = document.createElement("li");
-    item.textContent = `${el.name}`;
-    firstFiveItemsList.appendChild(item);
-  });
-  firstFiveItemsList.addEventListener("click", (e) => {
-    let el = fivePcs.filter((elem) => elem.name === e.target.innerText);
-    appendItem(...el);
-    firstFiveItemsList.innerHTML = "";
-    input.value = "";
-    totalRepo.textContent = `total repositories: 0`;
-  });
+  //sort response items
+  if (res.total_count === 0) {
+    console.log("null");
+    removeItem(search.querySelector(".first-five-repo"));
+    zeroRepo.textContent = `repositories was not found`;
+    zeroRepo.style.display = "block";
+  } else if (!res.total_count) {
+    zeroRepo.textContent = `start input please`;
+    zeroRepo.style.display = "block";
+  } else {
+    console.log("mnogo", res.total_count);
+    if (data.length !== 0) {
+      fivePcs = res.items.filter((el) =>
+        el.name.toLocaleLowerCase().startsWith(data.toLocaleLowerCase())
+      );
+      fivePcs = fivePcs.slice(0, 5);
+      if (search.querySelector(".first-five-repo") !== null) {
+        removeItem(search.querySelector(".first-five-repo"));
+      }
+      search.appendChild(firstFiveItemsList);
+
+      //show autocomplete
+      fivePcs.forEach((el) => {
+        let item = document.createElement("li");
+        item.textContent = `${el.name}`;
+        item.classList.add("suggestion");
+        firstFiveItemsList.appendChild(item);
+      });
+    }
+    //ev listener add item in choosen list
+    firstFiveItemsList.addEventListener("click", (e) => {
+      let el = fivePcs.filter((elem) => elem.name === e.target.innerText);
+      appendItem(...el);
+      removeItem(e.target.closest("ul"));
+      input.value = "";
+    });
+  }
 };
 
+//ev listener delete button
 itemsList.addEventListener("click", (e) => {
   let target = e.target;
   if (target.className === "del") {
@@ -55,4 +112,5 @@ itemsList.addEventListener("click", (e) => {
   }
 });
 
-input.addEventListener("keyup", debounce(repositories, 500));
+//ev listener input search
+input.addEventListener("input", debounce(repositories, 300));
