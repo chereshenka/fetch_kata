@@ -50,13 +50,6 @@ function appendItem(item) {
 //get response from server
 const repositories = async function () {
   const data = input.value;
-  zeroRepo.style.display = "none";
-  if (!data) {
-    removeItem(search.querySelector(".first-five-repo"));
-  } else {
-    let fivePcs = [];
-    const firstFiveItemsList = document.createElement("ul");
-    firstFiveItemsList.classList.add("first-five-repo");
     let response = await fetch(
       `https://api.github.com/search/repositories?q=${data}`,
       {
@@ -66,18 +59,29 @@ const repositories = async function () {
       }
     );
     let res = await response.json();
+    renderAutocomplete(res, data);
+};
+
+function renderAutocomplete(response, request){
+  let data = request;
+  zeroRepo.style.display = "none";
+  if (!data) {
+    removeItem(search.querySelector(".first-five-repo"));
+  } else {
+    let fivePcs = [];
+    const firstFiveItemsList = document.createElement("ul");
+    firstFiveItemsList.classList.add("first-five-repo");
     //sort response items
-    if (res.total_count === 0) {
-      console.log("null");
+    if (response.total_count === 0) {
       removeItem(search.querySelector(".first-five-repo"));
       zeroRepo.textContent = `repositories was not found`;
       zeroRepo.style.display = "block";
-    } else if (!res.total_count) {
+    } else if (!response.total_count) {
       zeroRepo.textContent = `start input please`;
       zeroRepo.style.display = "block";
     } else {
       if (data.length !== 0) {
-        fivePcs = res.items.filter((el) =>
+        fivePcs = response.items.filter((el) =>
           el.name.toLocaleLowerCase().startsWith(data.toLocaleLowerCase())
         );
         fivePcs = fivePcs.slice(0, 5);
@@ -96,14 +100,14 @@ const repositories = async function () {
       }
       //ev listener add item in choosen list
       firstFiveItemsList.addEventListener("click", (e) => {
+        input.value = "";
         let el = fivePcs.filter((elem) => elem.name === e.target.innerText);
         appendItem(...el);
         removeItem(e.target.closest("ul"));
-        input.value = "";
       });
     }
   }
-};
+}
 
 //ev listener delete button
 itemsList.addEventListener("click", (e) => {
